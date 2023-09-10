@@ -15,8 +15,8 @@ public class Render3D {
         pane.add(headingSlider, BorderLayout.SOUTH);
 
         // slider to control vertical rotation
-        JSlider pitJSlider = new JSlider(SwingConstants.VERTICAL, -90, 90, 0);
-        pane.add(pitJSlider, BorderLayout.EAST);
+        JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL, -90, 90, 0);
+        pane.add(pitchSlider, BorderLayout.EAST);
 
         // panel to display render results
         JPanel renderPanel = new JPanel() {
@@ -44,11 +44,27 @@ public class Render3D {
                                       Color.BLUE));
                 
                 double heading = Math.toRadians(headingSlider.getValue());
-                Matrix3 transform = new Matrix3(new double[] {
-                    Math.cos(heading), 0, -Math.sin(heading),
+
+                Matrix3 headingTransform = new Matrix3(new double[]{
+                    Math.cos(heading), 0, Math.sin(heading),
                     0, 1, 0,
-                    Math.sin(heading), 0, Math.cos(heading)
+                    -Math.sin(heading), 0, Math.cos(heading)
                 });
+                
+                double pitch = Math.toRadians(pitchSlider.getValue());
+                Matrix3 pitchTransform = new Matrix3(new double[]{
+                    1, 0, 0,
+                    0, Math.cos(pitch), Math.sin(pitch),
+                    0, -Math.sin(pitch), Math.cos(pitch)
+                });
+
+                Matrix3 transform = headingTransform.multiply(pitchTransform);
+
+                // Matrix3 transform = new Matrix3(new double[] {
+                //     Math.cos(heading), 0, -Math.sin(heading),
+                //     0, 1, 0,
+                //     Math.sin(heading), 0, Math.cos(heading)
+                // });
 
                 g2.translate(getWidth() / 2, getHeight() / 2);
                 g2.setColor(Color.WHITE);
@@ -68,11 +84,10 @@ public class Render3D {
         pane.add(renderPanel, BorderLayout.CENTER);
 
         headingSlider.addChangeListener(e -> renderPanel.repaint());
-        pitJSlider.addChangeListener(e -> renderPanel.repaint());
+        pitchSlider.addChangeListener(e -> renderPanel.repaint());
 
         frame.setSize(400, 400);
         frame.setVisible(true);
-
     }
 }
 
